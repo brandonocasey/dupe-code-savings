@@ -1,0 +1,43 @@
+{
+  "name": "dupe-code-warnings",
+  "version": "0.0.0",
+  "description": "Determine wether code is duplicated in a browser bundle",
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "vjsstandard",
+    "prepublishOnly": "vjsverify --verbose --skip-es-check",
+    "test": "npm run lint",
+    "preversion": "npm test",
+    "version": "is-prerelease || npm run update-changelog && git add CHANGELOG.md",
+    "update-changelog": "conventional-changelog -p videojs -i CHANGELOG.md -s"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.js": [
+      "vjsstandard --fix",
+      "git add"
+    ],
+    "README.md": [
+      "doctoc --notitle",
+      "git add"
+    ]
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gzip-size": "^5.1.1",
+    "line-column": "^1.0.2",
+    "source-map": "^0.7.3",
+    "uglify-js": "^3.6.0"
+  },
+  "devDependencies": {
+    "@videojs/generator-helpers": "~1.1.1",
+    "videojs-generator-verify": "~1.2.0",
+    "videojs-standard": "^8.0.3"
+  }
+}
