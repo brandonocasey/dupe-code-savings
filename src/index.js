@@ -38,7 +38,7 @@ const dupeCodeWarnings = function(options) {
     });
 
     if (!promises.length) {
-      throw Error('All checks excluded or not included via options! Valid checks:\n', Object.Keys(dupeFinders));
+      throw Error('All checks excluded or not included via options! Valid checks:\n' + Object.keys(dupeFinders).join(', '));
     }
 
     // clone minify options
