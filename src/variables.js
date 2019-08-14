@@ -2,23 +2,28 @@
 const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
+const typeRegex = /Function|Object|This|Literal/;
+const typesMatch = (...args) => {
+  let i = args.length;
+
+  while (i--) {
+    if (args[i] && typeRegex.test(args[i].type)) {
+      return true;
+    }
+  }
+
+  return false;
+};
+const codeRegex = /^(void0|-?\d);?$/;
+
 // find duplicate variables
 const variables = (ast, options) => Promise.resolve().then(function() {
   const utils = getUtils(options);
 
   walk.ancestor(ast, {
     VariableDeclarator(node, ancestors) {
-      // we only handle object/array variables
-      if (!node.init || node.init.type === 'Literal') {
-        return;
-      }
-
-      if (node.init.type === 'ThisExpression' || node.init.type === 'FunctionExpression') {
-        return;
-      }
-
-      // empty object
-      if (node.init.properties && !node.init.properties.length) {
+      // filter out non variables
+      if (!node.init || typesMatch(node.init, node.init.callee)) {
         return;
       }
 
@@ -41,24 +46,16 @@ const variables = (ast, options) => Promise.resolve().then(function() {
 
       const code = utils.getCode(node.init);
 
-      if ((/^void0;?$/).test(code) || (/^-?\d;?$/).test(code)) {
+      if (codeRegex.test(code)) {
         return;
       }
 
-      utils.setFrag(node, code);
+      node.init.addedBy = 'VariableDeclarator';
+      utils.setFrag(node.init, code);
     },
 
     Property(node) {
-      if (!node.value || node.value.type === 'Literal') {
-        return;
-      }
-
-      if (node.value.type === 'FunctionExpression') {
-        return;
-      }
-
-      // empty object
-      if (node.value.properties && !node.value.properties.length) {
+      if (!node.value || typesMatch(node, node.value, node.value.callee)) {
         return;
       }
 
@@ -68,11 +65,13 @@ const variables = (ast, options) => Promise.resolve().then(function() {
       }
       const code = utils.getCode(node.value);
 
-      if (code === 'void0' || (/^-?\d$/).test(code)) {
+      if (codeRegex.test(code)) {
         return;
       }
 
-      utils.setFrag(node, code);
+      node.value.addedBy = 'Property';
+
+      utils.setFrag(node.value, code);
     }
   });
 
