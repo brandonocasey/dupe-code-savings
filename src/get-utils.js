@@ -1,15 +1,15 @@
 const gzipSize = require('gzip-size');
-const uglify = require('uglify-js').minify;
+const terser = require('terser').minify;
 
 const nameCache = {};
 const tryUglify = function(code, options) {
-  let result = uglify(code, options);
+  let result = terser(code, options);
 
   if (!result.error) {
     return result.code;
   }
 
-  result = uglify('var test = ' + code, options);
+  result = terser('var test = ' + code, options);
 
   if (!result.error) {
     return result.code.replace('var test=', '');
@@ -25,16 +25,10 @@ const getUtils = function(options) {
 
   const utils = {
     getIdentCode(node) {
-      const code = options.code
+      return options.code
         .substring(node.start, node.end)
-        .trim();
-
-      return tryUglify(code, {
-        mangle: false,
-        compress: true,
-        // eslint-disable-next-line
-        parse: {bare_returns: true}
-      });
+        .trim()
+        .replace(/(\s|\n)+/g, ' ');
     },
     getCode(node) {
       const code = options.code
