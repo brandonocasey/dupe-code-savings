@@ -40,11 +40,11 @@ const printDupeResult = function(options, {type, results}) {
   });
 
   if (!filtered.length) {
-    console.log('*~*~*~*~* No Dupes for ${type} *~*~*~*~*');
+    console.log(`*~*~*~*~* No Dupes for ${type} *~*~*~*~*`);
     console.log();
   } else {
 
-    const titleLine = `*~*~*~*~* Dupes for ${type} *~*~*~*~*`;
+    const titleLine = `*~*~*~*~* ${filtered.length} of ${results.length} Dupes for ${type} *~*~*~*~*`;
     const firstLine = getLine({
       index: '#',
       bytes: 'bytes',

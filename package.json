@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "description": "Determine wether code is duplicated in a browser bundle",
   "main": "src/index.js",
+  "bin": {
+    "dupe-code-warnings": "src/cli.js"
+  },
   "scripts": {
     "lint": "vjsstandard",
     "prepublishOnly": "vjsverify --verbose --skip-es-check",
