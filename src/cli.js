@@ -8,6 +8,7 @@ const dupeFinders = require('./dupe-finders.js');
 const defaults = {
   max: 25,
   bytes: 25,
+  idLength: 75,
   printCode: false,
   gzip: true,
   minify: true,
@@ -25,11 +26,12 @@ const showHelp = function() {
 
   -i, --include     <check,check>  Only include dupe tests listed
   -x, --exclude     <check,check>  Exclude these dupe tests from being run
-  -p, --print-code                 Print code fragments after results
+  -l, --id-length   <length>       Longer length for dupe code id strings, Defaults to 50, -1 for Infinity.
   -b, --bytes       <bytes>        Show results below x bytes, ${defaults.bytes} by default, -1 to disable
   -m, --max         <max>          Max results to print per check, ${defaults.max} is default, -1 to disable
       --no-gzip                    Do not gzip code fragments, when getting duplicate byte costs
       --no-minify                  Do not minify code fragments, when getting duplicate byte costs
+      --positions                  Print byte positions instead of line
   -v, --version                    Print version and exit
   -V, --verbose                    log verbose information to stderr
   -h, --help                       Print help and exit
@@ -61,8 +63,11 @@ const parseArgs = function(args) {
     } else if ((/^--help|-h$/).test(arg)) {
       showHelp();
       process.exit(0);
-    } else if ((/^--print-code|-p$/).test(arg)) {
-      options.printCode = true;
+    } else if ((/^--l|-id-length$/).test(arg)) {
+      i++;
+      options.idLength = Number(args[i]);
+    } else if ((/^--positions$/).test(arg)) {
+      options.positions = true;
     } else if ((/^--bytes|-b$/).test(arg)) {
       i++;
       options.bytes = Number(args[i]);
@@ -94,6 +99,10 @@ const cli = function(code) {
   options.cutoff = options.cutoff || 0;
   if (options.max === -1) {
     options.max = Infinity;
+  }
+
+  if (options.idLength === -1) {
+    options.idLength = Infinity;
   }
 
   return dupeCodeWarnings(options).then(function(dupeResults) {
