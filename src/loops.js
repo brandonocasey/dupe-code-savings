@@ -5,16 +5,15 @@ const getUtils = require('./get-utils');
 // find duplicate variables
 const loops = (ast, options) => Promise.resolve().then(function() {
   const utils = getUtils(options);
-  const simple = (node) => utils.setFrag(node, utils.getCode(node));
 
   walk.simple(ast, {
-    WhileStatement: simple,
-    DoWhileStatement: simple,
-    ForStatement: simple,
-    ForInStatement: simple
+    WhileStatement: utils.simpleSet,
+    DoWhileStatement: utils.simpleSet,
+    ForStatement: utils.simpleSet,
+    ForInStatement: utils.simpleSet
   });
 
-  return utils.getResults((nodes, frag) => utils.getCode(nodes[0], false));
+  return utils.getResults();
 });
 
 module.exports = loops;

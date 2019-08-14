@@ -1,38 +1,47 @@
 const gzipSize = require('gzip-size');
 const uglify = require('uglify-js').minify;
 
-/* eslint-disable camelcase */
-const minifyOptions = {
-  parse: {bare_returns: true}
+const tryUglify = function(code, options) {
+  let result = uglify(code, options);
+
+  if (!result.error) {
+    return result.code;
+  }
+
+  result = uglify('var test = ' + code, options);
+
+  if (!result.error) {
+    return result.code.replace('var test=', '');
+  }
 };
-/* eslint-enable camelcase */
 
 const getUtils = function(options) {
   const frags = new Map();
   const dupes = new Map();
 
   const utils = {
-    getCode(node, useMinifyOption = true) {
+    getIdentCode(node) {
       const code = options.code
         .substring(node.start, node.end)
         .trim();
 
-      if (!useMinifyOption || !options.minify) {
+      return tryUglify(code, {
+        output: {comments: false},
+        mangle: false,
+        compress: true
+      });
+    },
+    getCode(node) {
+      const code = options.code
+        .substring(node.start, node.end)
+        .trim();
+
+      if (!options.minify) {
         return code;
       }
-      let result = uglify(code, minifyOptions);
 
-      if (!result.error) {
-        return result.code;
-      }
-
-      result = uglify('var test = ' + code, minifyOptions);
-
-      if (!result.error) {
-        return result.code.replace('var test=', '');
-      }
-
-      return code;
+      // eslint-disable-next-line
+      return tryUglify(code, {parse: {bare_returns: true}});
     },
     frags,
     dupes,
@@ -54,6 +63,10 @@ const getUtils = function(options) {
     getResults(callback) {
       const promises = [];
 
+      if (!callback) {
+        callback = (nodes, frag) => utils.getIdentCode(nodes[0]);
+      }
+
       dupes.forEach((nodes, frag) => promises.push(Promise.resolve().then(() => {
         const code = nodes.reduce((acc, node) => acc + (node.id && node.id.name || '') + frag, '');
 
@@ -65,7 +78,8 @@ const getUtils = function(options) {
         });
       })));
       return Promise.all(promises);
-    }
+    },
+    simpleSet: (node) => utils.setFrag(node, utils.getCode(node))
   };
 
   return utils;

@@ -45,6 +45,7 @@ const variables = (ast, options) => Promise.resolve().then(function() {
         return;
       }
 
+      node.init.parent = node;
       node.init.addedBy = 'VariableDeclarator';
       utils.setFrag(node.init, code);
     },
@@ -66,7 +67,7 @@ const variables = (ast, options) => Promise.resolve().then(function() {
     }
   });
 
-  return utils.getResults((nodes, frag) => utils.getCode(nodes[0], false));
+  return utils.getResults((nodes, frag) => utils.getIdentCode(nodes[0].parent || nodes[0]));
 });
 
 module.exports = variables;

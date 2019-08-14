@@ -23,7 +23,7 @@ const printDupeResult = function(options, {type, results}) {
     bytes: 'bytes',
     count: 'count',
     locations: options.positions ? 'start positions' : 'line numbers',
-    identifier: 'identifier'
+    identifier: 'identifier (compressed code)'
   };
 
   const maxLength = {

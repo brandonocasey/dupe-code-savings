@@ -4,7 +4,6 @@ const getUtils = require('./get-utils');
 
 const objects = (ast, options) => Promise.resolve().then(function() {
   const utils = getUtils(options);
-  const simple = (node) => utils.setFrag(node, utils.getCode(node));
 
   walk.simple(ast, {
     ObjectExpression(node) {
@@ -12,8 +11,7 @@ const objects = (ast, options) => Promise.resolve().then(function() {
       if (!node.properties || !node.properties.length) {
         return;
       }
-      simple(node);
-
+      utils.simpleSet(node);
     },
     ArrayExpression(node) {
       // empty array
@@ -21,11 +19,11 @@ const objects = (ast, options) => Promise.resolve().then(function() {
         return;
       }
 
-      simple(node);
+      utils.simpleSet(node);
     }
   });
 
-  return utils.getResults((nodes, frag) => utils.getCode(nodes[0], false));
+  return utils.getResults();
 });
 
 module.exports = objects;

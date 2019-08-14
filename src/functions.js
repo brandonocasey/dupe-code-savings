@@ -18,7 +18,7 @@ const functions = (ast, options) => Promise.resolve().then(function() {
   return utils
     .getResults((nodes, frag) => {
       return utils
-        .getCode(nodes[0], false)
+        .getIdentCode(nodes[0])
         .replace(/^(\s+)?function(\s+)?/, '');
 
     });
