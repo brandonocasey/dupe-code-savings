@@ -92,13 +92,21 @@ const getUtils = function(options) {
           let extra = '';
 
           if ((/Variable/).test(node.type)) {
-            extra = 'var =' + (node.id && node.id.name || '');
+            extra += `var ${node.id && node.id.name || ''}=`;
+          }
+
+          // added to functions to denote that they come from
+          // a variable
+          if (node.codesize_) {
+            const v = node.codesize_;
+
+            extra += `var ${v.id && v.id.name || v.init && v.init.id && v.init.id.name || ''}=`;
           }
 
           if ((/Function/).test(node.type)) {
-            extra = (node.id && node.id.name || '') + ' function';
+            extra = 'function ' + (node.id && node.id.name || '');
           }
-          return acc + frag + extra;
+          return acc + extra + frag;
         }, '');
 
         return Promise.resolve({

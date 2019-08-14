@@ -5,11 +5,16 @@ const getUtils = require('./get-utils');
 const functions = (ast, options) => Promise.resolve().then(function() {
   const utils = getUtils(options);
 
-  walk.simple(ast, {
-    Function(node) {
+  walk.ancestor(ast, {
+    Function(node, ancestors) {
       const code = utils.getCode(node)
-        .replace(/^(\s+)?function(\s+)?/, '')
         .replace(node.id && node.id.name || '', '');
+
+      const varAncestor = ancestors[ancestors.length - 2];
+
+      if ((/Variable/).test(varAncestor.type)) {
+        node.codesize_ = varAncestor;
+      }
 
       utils.setFrag(node, code);
     }
