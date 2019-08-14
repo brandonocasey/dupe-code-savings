@@ -33,6 +33,9 @@ const literals = (ast, options) => Promise.resolve().then(function() {
         return;
       }
       utils.setFrag(node, typeof node.value === 'string' ? node.value : node.raw);
+    },
+    Property(node) {
+      utils.setFrag(node.key, node.key.name);
     }
   });
 

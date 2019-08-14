@@ -7,7 +7,7 @@ const {version} = require('../package.json');
 const dupeFinders = require('./dupe-finders.js');
 const defaults = {
   max: 25,
-  bytes: 50,
+  bytes: 25,
   printCode: false,
   gzip: true,
   minify: true,
