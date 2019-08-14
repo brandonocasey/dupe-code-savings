@@ -1,6 +1,12 @@
 const gzipSize = require('gzip-size');
 const uglify = require('uglify-js').minify;
 
+/* eslint-disable camelcase */
+const minifyOptions = {
+  parse: {bare_returns: true}
+};
+/* eslint-enable camelcase */
+
 const getUtils = function(options) {
   const frags = new Map();
   const dupes = new Map();
@@ -14,13 +20,13 @@ const getUtils = function(options) {
       if (!useMinifyOption || !options.minify) {
         return code;
       }
-      let result = uglify(code);
+      let result = uglify(code, minifyOptions);
 
       if (!result.error) {
         return result.code;
       }
 
-      result = uglify('var test = ' + code);
+      result = uglify('var test = ' + code, minifyOptions);
 
       if (!result.error) {
         return result.code.replace('var test=', '');

@@ -20,7 +20,7 @@ const dupeCodeWarnings = function(options) {
   }
 
   return Promise.resolve().then(function() {
-    const ast = options.ast || acorn.parse(options.code, {locations: true});
+    const ast = options.ast || acorn.parse(options.code);
     const promises = [];
 
     Object.keys(dupeFinders).forEach(function(type) {
