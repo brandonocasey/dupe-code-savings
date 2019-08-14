@@ -9,7 +9,7 @@ const literals = (ast, options) => Promise.resolve().then(function() {
   walk.simple(ast, {
     Literal(node) {
       // skip single digit negative or positive numbers
-      if (typeof node.value === 'number' && (/^-?\d$/).test(node.value)) {
+      if ((/^-?\d$/).test(node.value)) {
         return;
       }
 
@@ -29,17 +29,22 @@ const literals = (ast, options) => Promise.resolve().then(function() {
       }
 
       // skip empty string
-      if (node.value === 'string' && !node.value.trim()) {
+      if (!node.value || (typeof node.value === 'string' && !node.value.trim())) {
         return;
       }
       utils.setFrag(node, typeof node.value === 'string' ? node.value : node.raw);
     },
     Property(node) {
+      // skip single digit negative or positive keys
+      if (!node.key || !node.key.name || (/^-?\d$/).test(node.key.name)) {
+        return;
+      }
+
       utils.setFrag(node.key, node.key.name);
     }
   });
 
-  return utils.getResults((nodes, frag) => `${frag}`);
+  return utils.getResults((nodes, frag) => frag);
 });
 
 module.exports = literals;

@@ -14,7 +14,7 @@ const dupeCodeWarnings = function(options) {
   }
 
   if (!options.code) {
-    throw Error('options.code must be passed to dupeCodeWarnings!');
+    return Promise.reject('options.code must be passed to dupeCodeWarnings!');
   }
 
   return Promise.resolve().then(function() {
@@ -36,7 +36,7 @@ const dupeCodeWarnings = function(options) {
     });
 
     if (!promises.length) {
-      throw Error('All checks excluded or not included via options! Valid checks:\n' + Object.keys(dupeFinders).join(', '));
+      return Promise.reject('No checks can be run due to options! Valid checks are:\n' + Object.keys(dupeFinders).join(', '));
     }
 
     // clone minify options
