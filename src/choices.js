@@ -4,6 +4,7 @@ const getUtils = require('./get-utils');
 
 // find duplicate variables
 const choices = (ast, options) => Promise.resolve().then(function() {
+  // cannot minify choices
   const utils = getUtils(options);
 
   walk.simple(ast, {

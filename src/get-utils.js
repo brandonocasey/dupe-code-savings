@@ -2,7 +2,7 @@ const gzipSize = require('gzip-size');
 const terser = require('terser').minify;
 
 const nameCache = {};
-const tryUglify = function(code, options) {
+const tryMinify = function(code, options) {
   let result = terser(code, options);
 
   if (!result.error) {
@@ -15,6 +15,18 @@ const tryUglify = function(code, options) {
     return result.code.replace('var test=', '');
   }
 
+  result = terser('for (;i;) {' + code + '}', options);
+
+  if (!result.error) {
+    return result.code.replace('for(;i;){', '').replace(/}$/, '');
+  }
+
+  result = terser('switch(i){' + code + '}', options);
+
+  if (!result.error) {
+    return result.code.replace('switch(i){', '').replace(/}$/, '');
+  }
+
   return code
     .replace(/(\s|\n)+/g, ' ');
 };
@@ -25,9 +37,13 @@ const getUtils = function(options) {
 
   const utils = {
     getIdentCode(node) {
-      return options.code
-        .substring(node.start, node.end)
-        .trim()
+      return tryMinify(options.code.substring(node.start, node.end), {
+        // eslint-disable-next-line
+        parse: {bare_returns: true},
+        output: {comments: false},
+        mangle: false,
+        compress: false
+      }).trim()
         .replace(/(\s|\n)+/g, ' ');
     },
     getCode(node) {
@@ -36,11 +52,11 @@ const getUtils = function(options) {
         .trim();
 
       if (!options.minify) {
-        return code;
+        return code
+          .replace(/(\s|\n)+/g, ' ');
       }
 
-      // eslint-disable-next-line
-      return tryUglify(code, {
+      return tryMinify(code, {
         nameCache,
         // eslint-disable-next-line
         parse: {bare_returns: true}
