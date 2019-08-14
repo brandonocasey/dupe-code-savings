@@ -5,19 +5,29 @@ const getLine = function(opts, max) {
     .trim();
 };
 
+const title = function(text) {
+  return `*~*~*~*~* ${text} *~*~*~*~*`;
+};
+
 const printDupeResult = function(options, {type, results}) {
-  console.log();
   const filtered = results.slice(0, options.max).filter(({bytes}) => options.bytes < bytes);
 
   if (!filtered.length) {
     if (results.length) {
-      console.log(`*~*~*~*~* No Dupes due to byte filter ${options.bytes} for ${type} *~*~*~*~*`);
+      console.log(title(`No Dupes due to byte filter ${options.bytes} for ${type}`));
     } else {
-      console.log(`*~*~*~*~* No Dupes with for ${type} *~*~*~*~*`);
+      console.log(title(`No Dupes with for ${type}`));
     }
-    console.log();
     return;
   }
+
+  const titleLine = `${type}: ` + (options.countOnly ? results.length : `${filtered.length}/${results.length}`);
+
+  if (options.countOnly) {
+    console.log(`* ${titleLine}`);
+    return;
+  }
+
   const headerObject = {
     index: '#',
     bytes: 'bytes',
@@ -56,11 +66,10 @@ const printDupeResult = function(options, {type, results}) {
     });
   });
 
-  const titleLine = `*~*~*~*~* ${filtered.length} of ${results.length} Dupes for ${type} *~*~*~*~*`;
   const headerLine = getLine(headerObject, maxLength);
 
   // center the title
-  console.log(' '.repeat(Math.max(headerLine.length / 2) - Math.max(titleLine.length / 2)) + titleLine);
+  console.log(' '.repeat(Math.max(headerLine.length / 2) - Math.max(title(titleLine).length / 2)) + title(titleLine));
   // header line
   console.log(headerLine);
   // separator

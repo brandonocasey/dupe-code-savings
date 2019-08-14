@@ -1,6 +1,7 @@
 const gzipSize = require('gzip-size');
 const uglify = require('uglify-js').minify;
 
+const nameCache = {};
 const tryUglify = function(code, options) {
   let result = uglify(code, options);
 
@@ -13,6 +14,9 @@ const tryUglify = function(code, options) {
   if (!result.error) {
     return result.code.replace('var test=', '');
   }
+
+  return code
+    .replace(/(\s|\n)+/g, ' ');
 };
 
 const getUtils = function(options) {
@@ -26,9 +30,10 @@ const getUtils = function(options) {
         .trim();
 
       return tryUglify(code, {
-        output: {comments: false},
         mangle: false,
-        compress: true
+        compress: true,
+        // eslint-disable-next-line
+        parse: {bare_returns: true}
       });
     },
     getCode(node) {
@@ -41,7 +46,11 @@ const getUtils = function(options) {
       }
 
       // eslint-disable-next-line
-      return tryUglify(code, {parse: {bare_returns: true}});
+      return tryUglify(code, {
+        nameCache,
+        // eslint-disable-next-line
+        parse: {bare_returns: true}
+      });
     },
     frags,
     dupes,
@@ -68,7 +77,19 @@ const getUtils = function(options) {
       }
 
       dupes.forEach((nodes, frag) => promises.push(Promise.resolve().then(() => {
-        const code = nodes.reduce((acc, node) => acc + (node.id && node.id.name || '') + frag, '');
+        const code = nodes.reduce((acc, node) => {
+          // extra bytes that were removed from variable/function nodes
+          let extra = '';
+
+          if ((/Variable/).test(node.type)) {
+            extra = 'var =' + (node.id && node.id.name || '');
+          }
+
+          if ((/Function/).test(node.type)) {
+            extra = (node.id && node.id.name || '') + ' function';
+          }
+          return acc + frag + extra;
+        }, '');
 
         return Promise.resolve({
           bytes: options.gzip ? gzipSize.sync(code) : code.length,

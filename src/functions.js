@@ -5,8 +5,8 @@ const getUtils = require('./get-utils');
 const functions = (ast, options) => Promise.resolve().then(function() {
   const utils = getUtils(options);
 
-  walk.ancestor(ast, {
-    Function(node, ancestors) {
+  walk.simple(ast, {
+    Function(node) {
       const code = utils.getCode(node)
         .replace(/^(\s+)?function(\s+)?/, '')
         .replace(node.id && node.id.name || '', '');

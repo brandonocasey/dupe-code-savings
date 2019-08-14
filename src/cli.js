@@ -9,9 +9,10 @@ const defaults = {
   max: 25,
   bytes: 25,
   idLength: 75,
-  printCode: false,
   gzip: true,
   minify: true,
+  positions: false,
+  countOnly: false,
   include: [],
   exclude: []
 };
@@ -32,6 +33,7 @@ const showHelp = function() {
       --no-gzip                    Do not gzip code fragments, when getting duplicate byte costs
       --no-minify                  Do not minify code fragments, when getting duplicate byte costs
       --positions                  Print byte positions instead of line
+      --count-only                 Only print the count of dupes, and not the results
   -v, --version                    Print version and exit
   -V, --verbose                    log verbose information to stderr
   -h, --help                       Print help and exit
@@ -75,6 +77,8 @@ const parseArgs = function(args) {
       options.gzip = false;
     } else if ((/^--no-minify|-u$/).test(arg)) {
       options.minify = false;
+    } else if ((/^--count-only|-c$/).test(arg)) {
+      options.countOnly = true;
     } else if ((/^--max|-m$/).test(arg)) {
       i++;
       options.max = Number(args[i]);
