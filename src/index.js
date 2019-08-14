@@ -2,8 +2,6 @@
 const acorn = require('acorn');
 const dupeFinders = require('./dupe-finders');
 
-// TODO: Loops
-// TODO: Choice statements
 // TODO: stretch often used properties and variables and recommend something
 // TODO: stretch get the total count of native functions used by function
 

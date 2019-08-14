@@ -2,7 +2,7 @@
 const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
-const typeRegex = /Function|Object|This|Literal/;
+const typeRegex = /Function|Object|This|Literal|Array/;
 const typesMatch = (...args) => {
   let i = args.length;
 
@@ -24,11 +24,6 @@ const variables = (ast, options) => Promise.resolve().then(function() {
     VariableDeclarator(node, ancestors) {
       // filter out non variables
       if (!node.init || typesMatch(node.init, node.init.callee)) {
-        return;
-      }
-
-      // empty array
-      if (node.init.elements && !node.init.elements.length) {
         return;
       }
 
@@ -59,10 +54,6 @@ const variables = (ast, options) => Promise.resolve().then(function() {
         return;
       }
 
-      // empty array
-      if (node.value.elements && !node.value.elements.length) {
-        return;
-      }
       const code = utils.getCode(node.value);
 
       if (codeRegex.test(code)) {

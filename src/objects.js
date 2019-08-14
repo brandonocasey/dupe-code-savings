@@ -7,8 +7,22 @@ const objects = (ast, options) => Promise.resolve().then(function() {
   const simple = (node) => utils.setFrag(node, utils.getCode(node));
 
   walk.simple(ast, {
-    ObjectExpression: simple,
-    ArrayExpression: simple
+    ObjectExpression(node) {
+      // empty array
+      if (!node.properties || !node.properties.length) {
+        return;
+      }
+      simple(node);
+
+    },
+    ArrayExpression(node) {
+      // empty array
+      if (!node.elements || !node.elements.length) {
+        return;
+      }
+
+      simple(node);
+    }
   });
 
   return utils.getResults((nodes, frag) => utils.getCode(nodes[0], false));
