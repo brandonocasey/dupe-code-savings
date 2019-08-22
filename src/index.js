@@ -56,9 +56,7 @@ const dupeCodeWarnings = function(options) {
     state.code = result.code;
     return new sourceMap.SourceMapConsumer(result.map);
   }).then(function(consumer) {
-    if (consumer) {
-      state.consumer = consumer;
-    }
+    state.consumer = consumer;
     return Promise.resolve();
   }).then(function() {
     return gzipSize(state.code).then(function(bytes) {
@@ -70,18 +68,23 @@ const dupeCodeWarnings = function(options) {
     return Promise.all(state.dupeFinders.map(function(type) {
       return dupeFinders[type](state).then((results) => Promise.resolve({type, results}));
     }));
-  }).then((dupeResults) => Promise.resolve(dupeResults.map((dupeResult) => ({
-    type: dupeResult.type,
-    results: dupeResult.results.sort(function(a, b) {
-      if (b.bytes > a.bytes) {
-        return 1;
-      } else if (b.bytes < a.bytes) {
-        return -1;
-      }
+  }).then((dupeResults) => {
+    // cleanup SourceMapConsumer
+    state.consumer.destroy();
 
-      return 0;
-    })
-  }))));
+    return Promise.resolve(dupeResults.map((dupeResult) => ({
+      type: dupeResult.type,
+      results: dupeResult.results.sort(function(a, b) {
+        if (b.bytes > a.bytes) {
+          return 1;
+        } else if (b.bytes < a.bytes) {
+          return -1;
+        }
+
+        return 0;
+      })
+    })));
+  });
 };
 
 module.exports = dupeCodeWarnings;

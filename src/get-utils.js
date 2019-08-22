@@ -70,13 +70,13 @@ const getUtils = function(state) {
       }
     },
     getResults(callback) {
-      const promises = [];
+      const results = [];
 
       if (!callback) {
         callback = (nodes, frag) => utils.getIdentCode(nodes[0]);
       }
 
-      dupes.forEach((nodes, frag) => promises.push(Promise.resolve().then(() => {
+      dupes.forEach((nodes, frag) => {
         // copy original code
         let code = (' ' + state.code).slice(1);
 
@@ -91,14 +91,16 @@ const getUtils = function(state) {
           code = code.substring(0, node.start) + code.substring(node.end);
         }
 
-        return gzipSize(code).then((bytes) => Promise.resolve({
+        const bytes = gzipSize.sync(code);
+
+        results.push({
           bytes: state.bytes - bytes,
           nodes,
           frag,
           identifier: callback(nodes, frag).replace(/(\s|\n)+/g, ' ')
-        }));
-      })));
-      return Promise.all(promises);
+        });
+      });
+      return Promise.resolve(results);
     },
     simpleSet: (node) => utils.setFrag(node, utils.getCode(node))
   };

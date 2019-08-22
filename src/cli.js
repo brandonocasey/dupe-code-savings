@@ -1,6 +1,7 @@
 #! /usr/bin/env node
 
 /* eslint-disable no-console */
+const {performance} = require('perf_hooks');
 const fs = require('fs');
 const dupeCodeWarnings = require('./index.js');
 const {version} = require('../package.json');
@@ -101,10 +102,16 @@ const cli = function(code) {
     options.idLength = Infinity;
   }
 
+  const startTime = performance.now();
+
   return dupeCodeWarnings(options).then(function(dupeResults) {
     dupeResults.forEach(function(dupeResult) {
       printDupeResult(options, dupeResult);
     });
+
+    const runTime = ((performance.now() - startTime).toFixed(0) / 1000);
+
+    console.log(`Finished in: ${runTime}s`);
     process.exit(0);
   }).catch(function(e) {
     console.error(e);
