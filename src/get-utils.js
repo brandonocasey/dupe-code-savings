@@ -1,56 +1,54 @@
 const gzipSize = require('gzip-size');
-const terser = require('terser').minify;
 
-const tryMinify = function(code, options) {
-  let result = terser(code, options);
-
-  if (!result.error) {
-    return result.code;
+const setOgLoc = function(state, node) {
+  if (!state.consumer) {
+    return;
   }
 
-  result = terser('var test = ' + code, options);
+  const start = state.consumer.originalPositionFor(node.loc.start);
+  const end = state.consumer.originalPositionFor(node.loc.end);
 
-  if (!result.error) {
-    return result.code.replace('var test=', '');
-  }
-
-  result = terser('for (;i;) {' + code + '}', options);
-
-  if (!result.error) {
-    return result.code.replace('for(;i;){', '').replace(/}$/, '');
-  }
-
-  result = terser('switch(i){' + code + '}', options);
-
-  if (!result.error) {
-    return result.code.replace('switch(i){', '').replace(/}$/, '');
-  }
-
-  return code
-    .replace(/(\s|\n)+/g, ' ');
+  node.loc.ogStart = start;
+  node.loc.ogEnd = end;
 };
-
 const getUtils = function(state) {
   const frags = new Map();
   const dupes = new Map();
 
   const utils = {
-    // TODO: use sourcemap
     getIdentCode(node) {
-      return tryMinify(state.code.substring(node.start, node.end), {
-        // eslint-disable-next-line
-        parse: {bare_returns: true},
-        output: {comments: false},
-        mangle: false,
-        compress: false
-      }).trim()
-        .replace(/(\s|\n)+/g, ' ');
+      let frag;
+
+      if (node.loc.ogStart && node.loc.ogEnd) {
+        const start = node.loc.ogStart;
+        const end = node.loc.ogEnd;
+
+        frag = '';
+
+        // source-map is 1 based for lines, but we will map to zero based
+        // since our lineMap is zero based.
+        for (let i = start.line - 1; i < end.line + 1; i++) {
+          let line = state.lineMap[i];
+
+          if (i === (start.line - 1)) {
+            line = line.substring(start.column);
+          }
+
+          frag += line + '\n';
+        }
+      } else {
+        frag = state.code.substring(node.start, node.end);
+      }
+
+      return frag
+        .trim()
+        .replace(/(\s|\r\n|\r|\n)+/g, ' ');
     },
     getCode(node) {
       return state.code
         .substring(node.start, node.end)
         .trim()
-        .replace(/(\s|\n)+/g, ' ');
+        .replace(/(\s|\r\n|\r|\n)+/g, ' ');
     },
     frags,
     dupes,
@@ -83,8 +81,10 @@ const getUtils = function(state) {
         // keep one node in the code
         let i = nodes.length - 1;
 
+        setOgLoc(state, nodes[nodes.length - 1]);
         while (i--) {
-          const node = nodes[i];
+          setOgLoc(state, nodes[i]);
+          const node = nodes[i].codesize_ || nodes[i];
 
           code = code.substring(0, node.start) + code.substring(node.end);
         }

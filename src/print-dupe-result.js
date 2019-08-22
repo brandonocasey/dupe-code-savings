@@ -34,7 +34,7 @@ const printDupeResult = function(options, {type, results}) {
     index: '#',
     bytes: 'bytes',
     count: 'count',
-    locations: options.positions ? 'start positions' : 'line numbers',
+    locations: options.positions ? 'minified position' : 'line numbers',
     identifier: 'identifier (compressed code)'
   };
 
@@ -50,7 +50,7 @@ const printDupeResult = function(options, {type, results}) {
     .slice(0, 6)
     .reduce((acc, {loc, start, end}) => {
       return acc + `${acc.length ? ', ' : ''}` +
-        `${options.positions ? start : loc.start.line}`;
+        `${options.positions ? start : (loc.ogStart && loc.ogStart.line || loc.start.line)}`;
     }, '');
 
   filtered.forEach(function({nodes, bytes, identifier}) {

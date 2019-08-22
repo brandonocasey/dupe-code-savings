@@ -3,6 +3,7 @@ const acorn = require('acorn');
 const dupeFinders = require('./dupe-finders');
 const terser = require('terser').minify;
 const gzipSize = require('gzip-size');
+const sourceMap = require('source-map');
 
 // TODO: stretch often used properties and variables and recommend something
 // TODO: stretch get the total count of native functions used by function
@@ -55,10 +56,15 @@ const dupeCodeWarnings = function(options) {
     if (result.error) {
       return Promise.reject('minify failed with error' + result.error);
     }
-    state.originalCode = options.code;
-    state.code = result.code;
-    state.map = result.map;
 
+    state.lineMap = options.code.split(/\r\n|\r|\n/);
+    state.code = result.code;
+    return new sourceMap.SourceMapConsumer(result.map);
+  }).then(function(consumer) {
+    if (consumer) {
+      state.consumer = consumer;
+    }
+    return Promise.resolve();
   }).then(function() {
     return gzipSize(state.code).then(function(bytes) {
       state.bytes = bytes;
