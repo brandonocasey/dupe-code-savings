@@ -17,10 +17,10 @@ const typesMatch = (...args) => {
 const codeRegex = /^(void0|-?\d);?$/;
 
 // find duplicate variables
-const variables = (ast, options) => Promise.resolve().then(function() {
-  const utils = getUtils(options);
+const variables = (state) => Promise.resolve().then(function() {
+  const utils = getUtils(state);
 
-  walk.ancestor(ast, {
+  walk.ancestor(state.ast, {
     VariableDeclarator(node, ancestors) {
       // filter out non variables
       if (!node.init || typesMatch(node.init, node.init.callee)) {

@@ -3,11 +3,11 @@ const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
 // find duplicate variables
-const choices = (ast, options) => Promise.resolve().then(function() {
+const choices = (state) => Promise.resolve().then(function() {
   // cannot minify choices
-  const utils = getUtils(options);
+  const utils = getUtils(state);
 
-  walk.simple(ast, {
+  walk.simple(state.ast, {
     IfStatement: utils.simpleSet,
     SwitchStatement(node) {
       if (!node.cases || !node.cases.length) {

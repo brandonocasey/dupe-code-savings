@@ -2,13 +2,19 @@
 const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
-const functions = (ast, options) => Promise.resolve().then(function() {
-  const utils = getUtils(options);
+const functions = (state) => Promise.resolve().then(function() {
+  const utils = getUtils(state);
 
-  walk.ancestor(ast, {
+  walk.ancestor(state.ast, {
     Function(node, ancestors) {
       const code = utils.getCode(node)
+        .replace(/^(\s+)?function(\s+)?/, '')
         .replace(node.id && node.id.name || '', '');
+
+      // skip noops
+      if ((/^\(\)\{\};?$/).test(code)) {
+        return;
+      }
 
       const varAncestor = ancestors[ancestors.length - 2];
 

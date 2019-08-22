@@ -2,10 +2,10 @@
 const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
-const objects = (ast, options) => Promise.resolve().then(function() {
-  const utils = getUtils(options);
+const objects = (state) => Promise.resolve().then(function() {
+  const utils = getUtils(state);
 
-  walk.simple(ast, {
+  walk.simple(state.ast, {
     ObjectExpression(node) {
       // empty array
       if (!node.properties || !node.properties.length) {

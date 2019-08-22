@@ -3,44 +3,16 @@ const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
 // find duplicate literals
-const literals = (ast, options) => Promise.resolve().then(function() {
-  const utils = getUtils(options);
+const literals = (state) => Promise.resolve().then(function() {
+  const utils = getUtils(state);
 
-  walk.simple(ast, {
+  walk.simple(state.ast, {
     Literal(node) {
-      // skip single digit negative or positive numbers
-      if ((/^-?\d$/).test(node.value)) {
+      // only strings < 27 in length are worth deduping
+      if (typeof node.value !== 'string' || node.raw.length < 27) {
         return;
       }
-
-      // skip null literal
-      if (node.value === null) {
-        return;
-      }
-
-      // skip boolean
-      if (typeof node.value === 'boolean') {
-        return;
-      }
-
-      // skip undefined
-      if (typeof node.value === 'undefined') {
-        return;
-      }
-
-      // skip empty string
-      if (!node.value || (typeof node.value === 'string' && !node.value.trim())) {
-        return;
-      }
-      utils.setFrag(node, typeof node.value === 'string' ? node.value : node.raw);
-    },
-    Property(node) {
-      // skip single digit negative or positive keys
-      if (!node.key || !node.key.name || (/^-?\d$/).test(node.key.name)) {
-        return;
-      }
-
-      utils.setFrag(node.key, node.key.name);
+      utils.setFrag(node, node.value);
     }
   });
 

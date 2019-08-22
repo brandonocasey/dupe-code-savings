@@ -7,9 +7,8 @@ const {version} = require('../package.json');
 const dupeFinders = require('./dupe-finders.js');
 const defaults = {
   max: 25,
-  bytes: 25,
-  idLength: 75,
-  gzip: true,
+  bytes: 10,
+  idLength: 50,
   minify: true,
   positions: false,
   countOnly: false,
@@ -28,10 +27,8 @@ const showHelp = function() {
   -i, --include     <check,check>  Only include dupe tests listed
   -x, --exclude     <check,check>  Exclude these dupe tests from being run
   -l, --id-length   <length>       Longer length for dupe code id strings, Defaults to 50, -1 for Infinity.
-  -b, --bytes       <bytes>        Show results below x bytes, ${defaults.bytes} by default, -1 to disable
-  -m, --max         <max>          Max results to print per check, ${defaults.max} is default, -1 to disable
-      --no-gzip                    Do not gzip code fragments, when getting duplicate byte costs
-      --no-minify                  Do not minify code fragments, when getting duplicate byte costs
+  -b, --max-bytes   <bytes>        Show results above x bytes, ${defaults.bytes} by default
+  -m, --max-results <max>          Max results to print per check, ${defaults.max} is default, -1 for Infinity
       --positions                  Print byte positions instead of line
       --count-only                 Only print the count of dupes, and not the results
   -v, --version                    Print version and exit
@@ -73,10 +70,6 @@ const parseArgs = function(args) {
     } else if ((/^--bytes|-b$/).test(arg)) {
       i++;
       options.bytes = Number(args[i]);
-    } else if ((/^--no-gzip|-g$/).test(arg)) {
-      options.gzip = false;
-    } else if ((/^--no-minify|-u$/).test(arg)) {
-      options.minify = false;
     } else if ((/^--count-only|-c$/).test(arg)) {
       options.countOnly = true;
     } else if ((/^--max|-m$/).test(arg)) {

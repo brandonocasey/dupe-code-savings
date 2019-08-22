@@ -10,6 +10,8 @@ const title = function(text) {
 };
 
 const printDupeResult = function(options, {type, results}) {
+  // filter out < 0
+  results = results.filter(({bytes}) => bytes > 0);
   const filtered = results.slice(0, options.max).filter(({bytes}) => options.bytes < bytes);
 
   if (!filtered.length) {
@@ -45,7 +47,7 @@ const printDupeResult = function(options, {type, results}) {
   };
 
   const getLocations = (nodes) => nodes
-    .slice(0, 3)
+    .slice(0, 6)
     .reduce((acc, {loc, start, end}) => {
       return acc + `${acc.length ? ', ' : ''}` +
         `${options.positions ? start : loc.start.line}`;

@@ -1,7 +1,6 @@
 const gzipSize = require('gzip-size');
 const terser = require('terser').minify;
 
-const nameCache = {};
 const tryMinify = function(code, options) {
   let result = terser(code, options);
 
@@ -31,13 +30,14 @@ const tryMinify = function(code, options) {
     .replace(/(\s|\n)+/g, ' ');
 };
 
-const getUtils = function(options) {
+const getUtils = function(state) {
   const frags = new Map();
   const dupes = new Map();
 
   const utils = {
+    // TODO: use sourcemap
     getIdentCode(node) {
-      return tryMinify(options.code.substring(node.start, node.end), {
+      return tryMinify(state.code.substring(node.start, node.end), {
         // eslint-disable-next-line
         parse: {bare_returns: true},
         output: {comments: false},
@@ -47,20 +47,10 @@ const getUtils = function(options) {
         .replace(/(\s|\n)+/g, ' ');
     },
     getCode(node) {
-      const code = options.code
+      return state.code
         .substring(node.start, node.end)
-        .trim();
-
-      if (!options.minify) {
-        return code
-          .replace(/(\s|\n)+/g, ' ');
-      }
-
-      return tryMinify(code, {
-        nameCache,
-        // eslint-disable-next-line
-        parse: {bare_returns: true}
-      });
+        .trim()
+        .replace(/(\s|\n)+/g, ' ');
     },
     frags,
     dupes,
@@ -87,34 +77,24 @@ const getUtils = function(options) {
       }
 
       dupes.forEach((nodes, frag) => promises.push(Promise.resolve().then(() => {
-        const code = nodes.reduce((acc, node) => {
-          // extra bytes that were removed from variable/function nodes
-          let extra = '';
+        // copy original code
+        let code = (' ' + state.code).slice(1);
 
-          if ((/Variable/).test(node.type)) {
-            extra += `var ${node.id && node.id.name || ''}=`;
-          }
+        // keep one node in the code
+        let i = nodes.length - 1;
 
-          // added to functions to denote that they come from
-          // a variable
-          if (node.codesize_) {
-            const v = node.codesize_;
+        while (i--) {
+          const node = nodes[i];
 
-            extra += `var ${v.id && v.id.name || v.init && v.init.id && v.init.id.name || ''}=`;
-          }
+          code = code.substring(0, node.start) + code.substring(node.end);
+        }
 
-          if ((/Function/).test(node.type)) {
-            extra = 'function ' + (node.id && node.id.name || '');
-          }
-          return acc + extra + frag;
-        }, '');
-
-        return Promise.resolve({
-          bytes: options.gzip ? gzipSize.sync(code) : code.length,
+        return gzipSize(code).then((bytes) => Promise.resolve({
+          bytes: state.bytes - bytes,
           nodes,
           frag,
           identifier: callback(nodes, frag).replace(/(\s|\n)+/g, ' ')
-        });
+        }));
       })));
       return Promise.all(promises);
     },

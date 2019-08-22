@@ -3,10 +3,10 @@ const walk = require('acorn-walk');
 const getUtils = require('./get-utils');
 
 // find duplicate variables
-const loops = (ast, options) => Promise.resolve().then(function() {
-  const utils = getUtils(options);
+const loops = (state) => Promise.resolve().then(function() {
+  const utils = getUtils(state);
 
-  walk.simple(ast, {
+  walk.simple(state.ast, {
     WhileStatement: utils.simpleSet,
     DoWhileStatement: utils.simpleSet,
     ForStatement: utils.simpleSet,
