@@ -16,7 +16,7 @@ const printDupeResult = function(options, {type, results}) {
 
   if (!filtered.length) {
     if (results.length) {
-      console.log(title(`No Dupes due to byte filter ${options.bytes} for ${type}`));
+      console.log(title(`No Dupes due to byte filter "${options.bytes}" for ${type}`));
     } else {
       console.log(title(`No Dupes with for ${type}`));
     }

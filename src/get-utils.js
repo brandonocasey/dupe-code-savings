@@ -1,7 +1,7 @@
 const gzipSize = require('gzip-size');
 
 const setOgLoc = function(state, node) {
-  if (!state.consumer) {
+  if (!state.consumer || node.loc.ogStart) {
     return;
   }
 
@@ -18,6 +18,8 @@ const getUtils = function(state) {
   const utils = {
     getIdentCode(node) {
       let frag;
+
+      setOgLoc(state, node);
 
       if (node.loc.ogStart && node.loc.ogEnd) {
         const start = node.loc.ogStart;
