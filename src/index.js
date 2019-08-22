@@ -46,11 +46,6 @@ const dupeCodeWarnings = function(options) {
   }
 
   return Promise.resolve().then(function() {
-    if (options.map || options.map === false || options.minify === false) {
-      state.code = options.code;
-      return Promise.resolve();
-    }
-
     const result = terser(options.code, {sourceMap: true});
 
     if (result.error) {
