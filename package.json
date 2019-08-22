@@ -1,10 +1,10 @@
 {
-  "name": "dupe-code-warnings",
+  "name": "dupe-code-savings",
   "version": "0.0.0",
   "description": "Determine wether code is duplicated in a browser bundle",
   "main": "src/index.js",
   "bin": {
-    "dupe-code-warnings": "src/cli.js"
+    "dupe-code-savings": "src/cli.js"
   },
   "scripts": {
     "lint": "vjsstandard",
