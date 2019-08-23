@@ -29,10 +29,16 @@
       "git add"
     ]
   },
+
+  "engines": {
+    "node": "^10.16.0",
+    "npm": "^6.4.1"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "brotli-size": "^4.0.0",
     "gzip-size": "^5.1.1",
     "source-map": "^0.7.3",
     "terser": "^4.1.4"

@@ -12,6 +12,7 @@ const defaults = {
   idLength: 50,
   positions: false,
   countOnly: false,
+  compressor: 'gzip',
   include: [],
   exclude: []
 };
@@ -29,6 +30,7 @@ const showHelp = function() {
   -l, --id-length   <length>       Longer length for dupe code id strings, Defaults to 50, -1 for Infinity.
   -b, --bytes       <bytes>        Show results above x bytes, ${defaults.bytes} by default
   -m, --max         <max>          Max results to print per check, ${defaults.max} is default, -1 for Infinity
+  -c, --compressor  <name>         Use brotli, gzip, or none for compression, default is ${defaults.compressor}
       --positions                  Print byte positions instead of line
       --count-only                 Only print the count of dupes, and not the results
   -v, --version                    Print version and exit
@@ -70,6 +72,9 @@ const parseArgs = function(args) {
     } else if ((/^--bytes|-b$/).test(arg)) {
       i++;
       options.bytes = Number(args[i]);
+    } else if ((/^--compressor|-c$/).test(arg)) {
+      i++;
+      options.compressor = args[i];
     } else if ((/^--count-only|-c$/).test(arg)) {
       options.countOnly = true;
     } else if ((/^--max|-m$/).test(arg)) {

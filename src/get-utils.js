@@ -1,12 +1,10 @@
-const gzipSize = require('gzip-size');
-
 const setOgLoc = function(state, node) {
-  if (!state.consumer || node.loc.ogStart) {
+  if (!state.mapConsumer || node.loc.ogStart) {
     return;
   }
 
-  const start = state.consumer.originalPositionFor(node.loc.start);
-  const end = state.consumer.originalPositionFor(node.loc.end);
+  const start = state.mapConsumer.originalPositionFor(node.loc.start);
+  const end = state.mapConsumer.originalPositionFor(node.loc.end);
 
   node.loc.ogStart = start;
   node.loc.ogEnd = end;
@@ -91,7 +89,7 @@ const getUtils = function(state) {
           code = code.substring(0, node.start) + code.substring(node.end);
         }
 
-        const bytes = gzipSize.sync(code);
+        const bytes = state.compressor(code);
 
         results.push({
           bytes: state.bytes - bytes,

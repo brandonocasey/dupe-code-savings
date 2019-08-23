@@ -3,6 +3,7 @@ const acorn = require('acorn');
 const dupeFinders = require('./dupe-finders');
 const terser = require('terser').minify;
 const gzipSize = require('gzip-size');
+const brotliSize = require('brotli-size');
 const sourceMap = require('source-map');
 
 // TODO: stretch often used properties and variables and recommend something
@@ -15,12 +16,20 @@ const dupeCodeWarnings = function(options) {
 
   const state = {
     code: null,
-    map: null,
-    originalCode: null,
-    gzipSize: null,
+    mapConsumer: null,
+    bytes: null,
+    compressor: 'gzip',
     ast: null,
     dupeFinders: []
   };
+
+  if (options.compressor === 'gzip') {
+    state.compressor = gzipSize.sync;
+  } else if (options.compressor === 'brotli') {
+    state.compressor = brotliSize.sync;
+  } else {
+    state.compressor = (code) => code.length;
+  }
 
   options.include = options.include || [];
   options.exclude = options.exclude || [];
@@ -56,12 +65,11 @@ const dupeCodeWarnings = function(options) {
     state.code = result.code;
     return new sourceMap.SourceMapConsumer(result.map);
   }).then(function(consumer) {
-    state.consumer = consumer;
+    state.mapConsumer = consumer;
     return Promise.resolve();
   }).then(function() {
-    return gzipSize(state.code).then(function(bytes) {
-      state.bytes = bytes;
-    });
+    state.bytes = state.compressor(state.code);
+    return Promise.resolve();
   }).then(function() {
     state.ast = acorn.parse(state.code, {locations: true});
 
@@ -70,7 +78,7 @@ const dupeCodeWarnings = function(options) {
     }));
   }).then((dupeResults) => {
     // cleanup SourceMapConsumer
-    state.consumer.destroy();
+    state.mapConsumer.destroy();
 
     return Promise.resolve(dupeResults.map((dupeResult) => ({
       type: dupeResult.type,
