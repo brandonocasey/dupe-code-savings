@@ -89,7 +89,7 @@ const parseArgs = function(args) {
 };
 
 const cli = function(code) {
-  const options = Object.assign({}, defaults, parseArgs(process.argv));
+  const options = Object.assign({}, defaults, parseArgs(process.argv.slice(2)));
 
   if (code) {
     options.code = code;
