@@ -55,15 +55,15 @@ const dupeCodeWarnings = function(options) {
   }
 
   return Promise.resolve().then(function() {
-    const result = terser(options.code, {sourceMap: true});
-
-    if (result.error) {
-      return Promise.reject('minify failed with error' + result.error);
+    return Promise.resolve(terser(options.code, {sourceMap: true}));
+  }).then(function({code, error, map}) {
+    if (error) {
+      return Promise.reject('minify failed with error' + error);
     }
 
     state.lineMap = options.code.split(/\r\n|\r|\n/);
-    state.code = result.code;
-    return new sourceMap.SourceMapConsumer(result.map);
+    state.code = code;
+    return new sourceMap.SourceMapConsumer(map);
   }).then(function(consumer) {
     state.mapConsumer = consumer;
     return Promise.resolve();
